@@ -1,0 +1,150 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.148'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.0'
+}
+
+def localProps = new Properties()
+def localPropsFile = file('local.properties')
+if (localPropsFile.exists()) {
+    localPropsFile.withInputStream { localProps.load(it) }
+}
+def cobblemonJarPath = project.findProperty('cobblemon_jar') ?: localProps.getProperty('cobblemon_jar')
+def showdownDirPath = project.findProperty('showdown_dir') ?: localProps.getProperty('showdown_dir')
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = "${mod_id}-neoforge-${minecraft_version}"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_21
+        apiVersion = KotlinVersion.KOTLIN_2_4
+        languageVersion = KotlinVersion.KOTLIN_2_4
+    }
+}
+
+repositories {
+    maven {
+        name = 'Kotlin for Forge'
+        url = 'https://thedarkcolour.github.io/KotlinForForge/'
+        content { includeGroup 'thedarkcolour' }
+    }
+    maven {
+        name = 'Cobblemon'
+        url = 'https://maven.impactdev.net/repository/development/'
+        content { includeGroup 'com.cobblemon' }
+    }
+    mavenCentral()
+}
+
+neoForge {
+    enable {
+        version = project.neo_version
+        disableRecompilation = true
+    }
+
+    runs {
+        client {
+            client()
+            gameDirectory = project.file('run/client')
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            gameDirectory = project.file('run/server')
+        }
+        configureEach {
+            jvmArguments.addAll('-Xmx3G', '-XX:ActiveProcessorCount=2')
+            logLevel = org.slf4j.event.Level.INFO
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+
+    addModdingDependenciesTo sourceSets.test
+}
+
+dependencies {
+    implementation "thedarkcolour:kotlinforforge-neoforge:${kff_version}"
+    if (cobblemonJarPath != null && file(cobblemonJarPath).exists()) {
+        compileOnly files(cobblemonJarPath)
+        testImplementation files(cobblemonJarPath)
+    } else {
+        implementation("com.cobblemon:neoforge:${cobblemon_version}") {
+            transitive = false
+        }
+    }
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.3'
+    testImplementation 'org.ow2.asm:asm:9.7.1'
+    testImplementation 'org.graalvm.polyglot:polyglot:24.1.1'
+    testImplementation 'org.graalvm.polyglot:js:24.1.1'
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    maxHeapSize = '768m'
+    if (cobblemonJarPath != null && file(cobblemonJarPath).exists()) {
+        inputs.file(cobblemonJarPath).withPropertyName('cobblemonJar').withPathSensitivity(PathSensitivity.NONE)
+        systemProperty 'cobblemon_majesty.cobblemonJar', cobblemonJarPath.toString()
+    }
+    if (showdownDirPath != null && file(showdownDirPath).exists()) {
+        systemProperty 'cobblemon_majesty.showdownDir', showdownDirPath.toString()
+    }
+}
+
+var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    var replaceProperties = [
+            minecraft_version_range: minecraft_version_range,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            cobblemon_version_range: cobblemon_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into 'build/generated/sources/modMetadata'
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.named('jar', Jar) {
+    from('LICENSE')
+    from('CREDITS.md')
+    manifest {
+        attributes(
+                'Implementation-Title': mod_name,
+                'Implementation-Version': mod_version,
+        )
+    }
+}

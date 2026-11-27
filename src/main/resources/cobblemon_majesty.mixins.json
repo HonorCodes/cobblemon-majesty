@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "codes.honor.cobblemonmajesty.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "GraalShowdownServiceMixin"
+  ],
+  "client": [
+    "client.PokemonRendererMixin",
+    "client.PosableModelMixin",
+    "client.PokemonClientDelegateMixin",
+    "client.SummaryMixin",
+    "client.BattleOverlayMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

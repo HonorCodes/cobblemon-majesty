@@ -1,0 +1,16 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+gradlew text eol=lf
+*.jar binary
+*.png binary
+*.ogg binary
+*.nbt binary
+*.json text eol=lf
+*.mcmeta text eol=lf
+*.toml text eol=lf
+*.kt comment-check
+*.java comment-check
+*.js comment-check
+*.mjs comment-check
