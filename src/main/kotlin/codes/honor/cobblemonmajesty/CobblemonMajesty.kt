@@ -5,6 +5,7 @@ import codes.honor.cobblemonmajesty.client.MajestyClient
 import codes.honor.cobblemonmajesty.command.MajestyCommands
 import codes.honor.cobblemonmajesty.config.MajestyConfig
 import codes.honor.cobblemonmajesty.feature.MajestyFeature
+import codes.honor.cobblemonmajesty.item.MajestyItems
 import codes.honor.cobblemonmajesty.sound.MajestySounds
 import codes.honor.cobblemonmajesty.spawning.MajestySpawning
 import com.cobblemon.mod.common.api.events.CobblemonEvents
@@ -31,6 +32,7 @@ object CobblemonMajesty {
         val container = ModLoadingContext.get().activeContainer
         container.registerConfig(ModConfig.Type.COMMON, MajestyConfig.SPEC)
         MajestySounds.register(MOD_BUS)
+        MajestyItems.register(MOD_BUS)
         MOD_BUS.addListener(FMLCommonSetupEvent::class.java) { onCommonSetup(it) }
         NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent::class.java) { MajestyCommands.register(it.dispatcher) }
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent::class.java) { MajestyShowdown.clearAll() }

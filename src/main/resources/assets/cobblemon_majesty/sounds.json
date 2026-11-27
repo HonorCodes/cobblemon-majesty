@@ -4,8 +4,16 @@
     "sounds": [
       {
         "name": "cobblemon_majesty:majestic_presence",
-        "volume": 0.75,
-        "pitch": 1.0
+        "stream": false
+      }
+    ]
+  },
+  "majestic_sparkle": {
+    "subtitle": "subtitles.cobblemon_majesty.majestic_sparkle",
+    "sounds": [
+      {
+        "name": "cobblemon_majesty:majestic_sparkle",
+        "stream": false
       }
     ]
   }

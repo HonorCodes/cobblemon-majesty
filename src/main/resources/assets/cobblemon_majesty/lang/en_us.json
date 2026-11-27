@@ -1,8 +1,17 @@
 {
+  "item.cobblemon_majesty.majesty_orb": "Majesty Orb",
+  "item.cobblemon_majesty.majesty_orb.tooltip": "A legendary orb that reveals the majesty of a Pokémon.",
+  "itemGroup.cobblemon_majesty": "Cobblemon Majesty",
   "cobblemon_majesty.badge": "✦",
   "cobblemon_majesty.summary.title": "Majestic",
   "cobblemon_majesty.summary.types": "Aura: %s",
   "cobblemon_majesty.summary.bonus": "+%s%% Type Mastery",
   "cobblemon_majesty.summary.aesthetic": "Elemental Type Aura",
-  "subtitles.cobblemon_majesty.majestic_presence": "Majestic aura resonates"
+  "cobblemon_majesty.orb.success": "✦ %s awakened its Majestic aura!",
+  "cobblemon_majesty.orb.already_majestic": "%s is already Majestic!",
+  "cobblemon_majesty.orb.not_captured": "Majesty Orb can only be used on a captured Pokémon.",
+  "cobblemon_majesty.orb.not_owner": "You can only use a Majesty Orb on your own Pokémon.",
+  "cobblemon_majesty.orb.in_battle": "Cannot use a Majesty Orb during battle.",
+  "subtitles.cobblemon_majesty.majestic_presence": "Majestic aura resonates",
+  "subtitles.cobblemon_majesty.majestic_sparkle": "Majestic Pokémon sparkles"
 }

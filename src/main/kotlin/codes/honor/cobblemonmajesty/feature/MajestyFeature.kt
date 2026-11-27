@@ -35,11 +35,13 @@ object MajestyFeature {
     fun applyMajestic(pokemon: Pokemon, additionalPerfectIvs: Int, random: Random = Random.Default): Int {
         markRolled(pokemon)
         val existing = pokemon.features.filterIsInstance<FlagSpeciesFeature>().firstOrNull { it.name == ASPECT }
-        if (existing != null) {
+        val feature = if (existing != null) {
             existing.enabled = true
+            existing
         } else {
-            pokemon.features.add(FlagSpeciesFeature(ASPECT, true))
+            FlagSpeciesFeature(ASPECT, true).also { pokemon.features.add(it) }
         }
+        pokemon.markFeatureDirty(feature)
         pokemon.updateAspects()
         pokemon.entity?.let { syncEntityAspects(it, pokemon) }
         return applyAdditionalPerfectIvs(pokemon, additionalPerfectIvs, random)
@@ -64,7 +66,7 @@ object MajestyFeature {
         return promoted
     }
 
-    private fun syncEntityAspects(entity: PokemonEntity, pokemon: Pokemon) {
+    fun syncEntityAspects(entity: PokemonEntity, pokemon: Pokemon) {
         val updated = LinkedHashSet(entity.aspects)
         updated.addAll(pokemon.aspects)
         updated.add(ASPECT)

@@ -15,9 +15,17 @@ object MajestySounds {
     val WILD_PRESENCE_ID: ResourceLocation =
         ResourceLocation.fromNamespaceAndPath(CobblemonMajesty.ID, "majestic_presence")
 
+    val MAJESTIC_SPARKLE_ID: ResourceLocation =
+        ResourceLocation.fromNamespaceAndPath(CobblemonMajesty.ID, "majestic_sparkle")
+
     val WILD_PRESENCE: DeferredHolder<SoundEvent, SoundEvent> =
         SOUND_EVENTS.register("majestic_presence") { ->
             SoundEvent.createVariableRangeEvent(WILD_PRESENCE_ID)
+        }
+
+    val MAJESTIC_SPARKLE: DeferredHolder<SoundEvent, SoundEvent> =
+        SOUND_EVENTS.register("majestic_sparkle") { ->
+            SoundEvent.createVariableRangeEvent(MAJESTIC_SPARKLE_ID)
         }
 
     fun register(modBus: IEventBus) {

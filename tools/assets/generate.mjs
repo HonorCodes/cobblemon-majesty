@@ -236,6 +236,54 @@ function generateAreaGlow() {
     return encodePng(w, h, rgba);
 }
 
+function generateMajestyOrbItem() {
+    const w = 16;
+    const h = 16;
+    const rgba = Buffer.alloc(w * h * 4, 0);
+    const grid = [
+        '................',
+        '......OOOO......',
+        '....OOIIIIOO....',
+        '...OIIWWWWPAO...',
+        '..OIWWHHWWPAAO..',
+        '..OIWWHWWPPAAO..',
+        '.OIWWPPGGAAQQLD.',
+        '.OIPPPGGGGQQLLD.',
+        '.OPPLLGGQQQLLSD.',
+        '.OAPLLLQQQLLSSD.',
+        '..OALLLLQQSSBD..',
+        '..ODLLLLSSBBDD..',
+        '...ODSSSSBBDD...',
+        '....DDSSBBDD....',
+        '......DDDD......',
+        '................'
+    ];
+    const palette = {
+        O: [104, 110, 156, 255],
+        D: [58, 48, 96, 255],
+        I: [224, 244, 255, 255],
+        W: [247, 250, 255, 255],
+        H: [255, 255, 255, 255],
+        P: [252, 214, 236, 255],
+        G: [255, 241, 204, 255],
+        A: [194, 242, 238, 255],
+        Q: [184, 224, 248, 255],
+        L: [198, 188, 244, 255],
+        S: [144, 132, 194, 255],
+        B: [196, 232, 250, 255]
+    };
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const ch = grid[y][x];
+            if (palette[ch]) {
+                const [r, g, b, a] = palette[ch];
+                setPixel(rgba, w, h, x, y, r, g, b, a);
+            }
+        }
+    }
+    return encodePng(w, h, rgba);
+}
+
 function generateMajesticBadgeIcon() {
     const w = 16;
     const h = 16;
@@ -275,13 +323,76 @@ function generateMajesticBadgeIcon() {
     return encodePng(w, h, rgba);
 }
 
+function generateModIcon() {
+    const w = 128;
+    const h = 128;
+    const rgba = Buffer.alloc(w * h * 4, 0);
+    const palette = [
+        [10, 5, 20, 255],
+        [5, 12, 34, 255],
+        [0, 110, 248, 255],
+        [8, 244, 250, 255],
+        [250, 6, 44, 255],
+        [204, 196, 216, 255],
+        [11, 18, 44, 255],
+        [13, 32, 76, 255],
+        [8, 66, 158, 255],
+        [0, 176, 255, 255],
+        [172, 252, 255, 255],
+        [255, 255, 255, 255]
+    ];
+    const packedB64 = [
+        'eNrVmb1uIzcQgAnKZ-mcaqMX4HEBJ1ClJYEUV6XQA7hxL9wBm0OqwxUWkEpwcyrvEQwLSILNG_jpwp8Z',
+        'ckgud60EKbKFsfLuxxkO549cxv7jS0ox_9Jut_v5VTwXl_KtlrP8BG54MgCXcuSVqxp_LPhWmb_LY8GP',
+        '4ivHd2stojKWZ48iFz-qOndI16zRhBJ4M454BS-RV8jrtefZQk3jDlDANyCV6w559n5LjF_yW5QhPS-c',
+        '8fW7wG_OhC8t96flhVPZ8Gu3BLzVjefNAz5s62vP37-Y93TgvQWlboDfEgVG197K9zaTFvcWDLzTDhUY',
+        'X_ttyjdGF6u-4712bDPFm9efFlvCS2HFE_k4gZrrb1JeyTbwbv44AcJzakL_lAPfKLeQ0f5hAoS_ofgZ',
+        'XaaBCejIUxeIPP_rOXtGeeXuNOH5uSo_eAfXHjcu1DU5714anX_wTsKDGaiJt6X9vybiS96b7nONl8c4',
+        's4SHC_hDhYdEsZnjVz4JiIzHrLAQke8orif5BWYlwks6gIljETNjzvMzYiS7ZbwgmTnn46xVkv-p_k6-',
+        'KSKnICbwm7Bo3r815lzCt27-JrB4EIN8XHPgJRqgsL-Rz8NryEftaZHjsk15GV_hlKfiV7TepQ5g8oBA',
+        'FTnNHyj-JeXbdP1N_EIFlSkfxNthloRPcWNB7adg4BPlz6Rw0MXL-bX2IWwm_5nwwXrfUj7HYwrK-G2l',
+        'eZjg2ShvTC5Dl8HLCSDfCsprMc5LXWgA7cgi4VXotky_EjsWXk4AQ3iKV1O8rPPG26y-a1m3X-hFMNd4',
+        'XoA03WC1Z7H5iEtPpsYSXk7w-hU8J4tFaoQzpm664Pukfyx4CDVNaoRbS_QBWvtyfkV5cTm_hE4r5tgX',
+        'MsjreC8em02SjqSa5Yn6Mg9k2SKfFM9zykOiDIv3reR1UXwp3yb-xWkOQweQrOwQkJcpvyIVLPgu2cqE',
+        'hIU8SFmrbIdCQog-K_muWP0iheqowKbC53jKxxUICWuOZzQFxcQwXMB3ee6C6b8QPvSZ-fRx9VMXctM_',
+        'z_AulaYJFBTw6m8nee6ymR7nz8FFc16S2C3whE_qL_IhyGwyK6sX8G76q3FejjReBb8NZbrGt7M8G-Mx',
+        'SMbFQwjTZgV5fH9tnNRudsZwHDz2x5FvKS-rPKvwpFWwRWKs8M_wOmlSmkv5xM9rl67zvKJyU3X_Iv92',
+        's7jKswfN_-2_4xlpVSsjheAkzTLhQ6zrOZ6X_IJkunl-2Ob829Csr6uGjMnFGoCn9ncZxzcchKc_SG2w',
+        'BrhJ-FVsGKp8LB_GALDdTvefPmUmHhN_6bgvsga4Kc4fNuWeU5H9E-GtAXjO45kD4VtZ8HK8_sX_Ed7k',
+        'G-gLusBX6m_0SsorVuPz_iH-i-yZjcN7-32P_KLWv5AzD6lIw9AS3qyfFpX-iQRVWDLrMD4qPW_2HIvc',
+        'AIGPPo28y9aEzwwoMv6cd0yWh_ZDFzxuIFLenllxCEMnHpz5Ah4TodZ4aGfdUHdzPDa0kZeX8fA0bgNE',
+        '-GV-zPPwj7ajvSLwPij_OS9cGGl6Fq8LXkU-9NqeV8KFQdKcqiJ-SOEPrXbCN9O8jI2ETniNcUAb6JLn',
+        'Vd7Mm-d8Gf_uQMXzKuUFK3hZ8u5USna00_exrNGRwrDfPYkR_ivyraTnb-7YCxYAjzrVGL_E5Yt9tg7H',
+        'ZvZB6C4XnI3wuPzrjJdomNB_v5WTvMp4XBgzMOygjxXen_fXeHPr-VXKx28I_i10VB_LlIcTgBOb5iFS',
+        'PN9K2uE6Pn4B2vkvKDAA5n485WqjNpEXbPmZ8g6HYzyddGpQ_CCTdaEMLkn_x954-bsRHlKZO7YM_VmS',
+        'RSzPRvi1pE2xM0eVv_dfkSZ4Fw91_s4M8QpeZ4fAkb9jd8jrKs99c5XtsDMeOjCd2M_zzxKuUf5q55pI',
+        '5O36L2IlVbf7_R5wc7so58-c_Ov-C7xl7u0P0Eb98ND3vxz81efyDX1_d2V_7QO_3_eHwxdQR8mD4XsL',
+        'D8Pw8aM8HRPeXszL9yIePh39LYxm_nNtHv46DIe-T7-9GtmRZ6zvfxuGfm_vDG7uzfXH4fDpZKYyPH_4',
+        'sN-z5PzUXm8AXz22ehh-v731ulgNHvpbY7Hrn34knzfKK4rH781PJsYf2d5K88Y-TX2_vr-_Y__P629d',
+        's0PG'
+    ].join('');
+    const packed = zlib.inflateSync(Buffer.from(packedB64, 'base64url'));
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x += 2) {
+            const byte = packed[(y * w + x) >> 1];
+            const c0 = palette[(byte >> 4) & 0x0f];
+            const c1 = palette[byte & 0x0f];
+            setPixel(rgba, w, h, x, y, c0[0], c0[1], c0[2], c0[3]);
+            setPixel(rgba, w, h, x + 1, y, c1[0], c1[1], c1[2], c1[3]);
+        }
+    }
+    return encodePng(w, h, rgba);
+}
+
 const targets = [
+    ['icon.png', generateModIcon()],
     ['textures/entity/aura_wisp.png', generateAuraWispStrip()],
     ['textures/entity/comet_ember.png', generateCometEmber()],
     ['textures/entity/filament_strip.png', generateFilamentStrip()],
     ['textures/entity/spark_dot.png', generateSparkDot()],
     ['textures/entity/star_mote.png', generateStarMote()],
     ['textures/entity/area_glow.png', generateAreaGlow()],
+    ['textures/item/majesty_orb.png', generateMajestyOrbItem()],
     ['textures/gui/icon_majestic.png', generateMajesticBadgeIcon()]
 ];
 
@@ -307,16 +418,21 @@ for (const [relPath, bytes] of targets) {
     }
 }
 
-const soundPath = path.join(assetsRoot, 'sounds/majestic_presence.ogg');
-if (checkOnly) {
-    if (!fs.existsSync(soundPath) || fs.statSync(soundPath).size < 256) {
-        console.error('Missing or empty sound asset: sounds/majestic_presence.ogg');
-        mismatches++;
+for (const soundRel of ['sounds/majestic_presence.ogg', 'sounds/majestic_sparkle.ogg']) {
+    const soundPath = path.join(assetsRoot, soundRel);
+    if (checkOnly) {
+        if (!fs.existsSync(soundPath) || fs.statSync(soundPath).size < 256) {
+            console.error(`Missing or empty sound asset: ${soundRel}`);
+            mismatches++;
+        }
     }
+}
+
+if (checkOnly) {
     if (mismatches > 0) {
         process.exit(1);
     }
-    console.log(`Verified ${targets.length} generated textures and 1 sound asset.`);
+    console.log(`Verified ${targets.length} generated textures and 2 sound assets.`);
 } else {
     console.log(`Generated ${targets.length} textures into ${assetsRoot}.`);
 }

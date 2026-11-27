@@ -40,6 +40,7 @@ object MajestyClientConfig {
         val auraLightEnabled: ModConfigSpec.BooleanValue
         val auraLightIntensity: ModConfigSpec.DoubleValue
         val wildChimeEnabled: ModConfigSpec.BooleanValue
+        val sendOutSfxEnabled: ModConfigSpec.BooleanValue
         val nameplateBadgeEnabled: ModConfigSpec.BooleanValue
         val summaryBadgeEnabled: ModConfigSpec.BooleanValue
         val fullAuraDistance: ModConfigSpec.DoubleValue
@@ -59,6 +60,8 @@ object MajestyClientConfig {
                 .defineInRange("auraLightIntensity", 1.0, 0.1, 2.5)
             wildChimeEnabled = builder.comment("Plays a resonant harmonic chime when spotting an unowned wild Majestic Pokemon.")
                 .define("wildChimeEnabled", true)
+            sendOutSfxEnabled = builder.comment("Plays the custom Majestic sparkle SFX when a Majestic Pokemon emerges from a Poke Ball.")
+                .define("sendOutSfxEnabled", true)
             nameplateBadgeEnabled = builder.comment("Shows the gold star mark on world and battle HUD nameplates.").define("nameplateBadgeEnabled", true)
             summaryBadgeEnabled = builder.comment("Shows the Majestic badge and tooltip in the Cobblemon Summary screen.")
                 .define("summaryBadgeEnabled", true)

@@ -29,6 +29,8 @@ class MajestyConfigDefaultsTest {
         assertTrue(MajestyClientConfig.aura.starMotesEnabled.default)
         assertTrue(MajestyClientConfig.aura.glowingEyesEnabled.default)
         assertTrue(MajestyClientConfig.aura.auraLightEnabled.default)
+        assertTrue(MajestyClientConfig.aura.wildChimeEnabled.default)
+        assertTrue(MajestyClientConfig.aura.sendOutSfxEnabled.default)
         assertEquals(1.0, MajestyClientConfig.aura.auraLightIntensity.default, 1e-6)
     }
 }

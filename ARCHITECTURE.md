@@ -7,11 +7,12 @@
 | `codes.honor.cobblemonmajesty` | Common | `@Mod` entrypoint (`CobblemonMajesty`), fault-isolating `Guard`, lifecycle wiring |
 | `codes.honor.cobblemonmajesty.config` | Common | `MajestyConfig` (`cobblemon_majesty-common.toml`) for odds, IV promotion, source toggles, and combat toggle |
 | `codes.honor.cobblemonmajesty.feature` | Common | `GlobalSpeciesFeatures` registration (`majestic` `FlagSpeciesFeatureProvider`), aspect sync, idempotent roll marker (`cobblemon_majesty_rolled`), `+N` additional 31 IV selection |
+| `codes.honor.cobblemonmajesty.item` | Common | `MajestyItems` (`DeferredRegister` + Creative tab) and `MajestyOrbItem` (`PokemonSelectingItem` + direct `PokemonEntity` interaction for captured Pokémon) |
 | `codes.honor.cobblemonmajesty.spawning` | Common | Event subscribers for wild spawns, fishing, PokéSnacks, fossils, starters, egg exclusion, and `ActorType.NPC` trainer team rolls |
 | `codes.honor.cobblemonmajesty.battle` | Common | `MajestyShowdown` GraalJS bridge registering per-battle Majestic `Pokemon.uuid` sets and hooking Showdown `ModifyDamage` |
 | `codes.honor.cobblemonmajesty.palette` | Common | 18-type emissive primary + accent defaults, non-averaging dual-strand resolver, symmetric pixel inversion math, and `EyeBoneClassifier` |
-| `codes.honor.cobblemonmajesty.sound` | Common | `DeferredRegister` for `cobblemon_majesty:majestic_presence` |
-| `codes.honor.cobblemonmajesty.client` | `Dist.CLIENT` | `MajestyClientConfig`, `MajestyInvertedTextureCache`, Iris-compatible `RenderType` shards, ground filament/spark + wisp/comet/star renderer, `PosableModel` shader eye glow, terrain-conforming HDR area light + Iris colored-entity bridge, wild notice chime, world/battle/Summary `✦` badges |
+| `codes.honor.cobblemonmajesty.sound` | Common | `DeferredRegister` for `cobblemon_majesty:majestic_presence` and `cobblemon_majesty:majestic_sparkle` |
+| `codes.honor.cobblemonmajesty.client` | `Dist.CLIENT` | `MajestyClientConfig`, `MajestyInvertedTextureCache`, Iris-compatible `RenderType` shards, ground filament/spark + wisp/comet/star renderer, `PosableModel` shader eye glow, terrain-conforming HDR area light + Iris colored-entity bridge, wild discovery & Poké Ball send-out SFX, world/battle/Summary `✦` badges |
 | `codes.honor.cobblemonmajesty.mixin` | Common & Client | `GraalShowdownServiceMixin` (server/common) and 6 client-only rendering/UI mixins isolated under `"client"` in `cobblemon_majesty.mixins.json` |
 
 ## Key Design Decisions
