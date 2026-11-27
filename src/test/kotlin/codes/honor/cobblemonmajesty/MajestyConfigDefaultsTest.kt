@@ -24,7 +24,8 @@ class MajestyConfigDefaultsTest {
         assertEquals(1.1, MajestyConfig.combat.damageMultiplier.default, 1e-6)
 
         assertTrue(MajestyClientConfig.aura.enabled.default)
-        assertTrue(MajestyClientConfig.aura.groundHaloEnabled.default)
+        assertTrue(MajestyClientConfig.aura.invertBaseColors.default)
+        assertTrue(MajestyClientConfig.aura.groundParticlesEnabled.default)
         assertTrue(MajestyClientConfig.aura.starMotesEnabled.default)
         assertTrue(MajestyClientConfig.aura.glowingEyesEnabled.default)
         assertTrue(MajestyClientConfig.aura.auraLightEnabled.default)

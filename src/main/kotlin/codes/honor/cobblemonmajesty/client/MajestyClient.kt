@@ -15,7 +15,10 @@ object MajestyClient {
         modBus.addListener(ModConfigEvent.Loading::class.java) { onConfig(it.config) }
         modBus.addListener(ModConfigEvent.Reloading::class.java) { onConfig(it.config) }
         modBus.addListener(RegisterClientReloadListenersEvent::class.java) { event ->
-            event.registerReloadListener(ResourceManagerReloadListener { MajestyEyeGlowRenderer.clearCache() })
+            event.registerReloadListener(ResourceManagerReloadListener {
+                MajestyEyeGlowRenderer.clearCache()
+                MajestyInvertedTextureCache.clearCache()
+            })
         }
         NeoForge.EVENT_BUS.addListener(RenderLevelStageEvent::class.java) { event ->
             if (event.stage == RenderLevelStageEvent.Stage.AFTER_SKY) {

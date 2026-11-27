@@ -100,7 +100,7 @@ object MajestyEyeGlowRenderer {
 
         val baseTexture = eyeGuard.callOrNull {
             VaryingModelRepository.getTexture(speciesId, delegate)
-        } ?: return
+        }?.let(MajestyInvertedTextureCache::unwrapOriginal) ?: return
 
         val eyeRenderType = getOrCreateEyeMaskRenderType(baseTexture) ?: return
         val consumer = provider.getBuffer(eyeRenderType)

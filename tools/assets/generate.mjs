@@ -137,6 +137,50 @@ function generateCometEmber() {
     return encodePng(w, h, rgba);
 }
 
+function generateFilamentStrip() {
+    const w = 16;
+    const h = 16;
+    const rgba = Buffer.alloc(w * h * 4, 0);
+    const cx = 7.5;
+
+    for (let x = 0; x < w; x++) {
+        const norm = Math.abs(x - cx) / 7.5;
+        if (norm >= 1.0) continue;
+        const falloff = Math.pow(1.0 - norm * norm, 1.85);
+        const core = 236 + 19 * Math.max(0.0, 1.0 - norm * 1.8);
+        const alpha = falloff * 252;
+        if (alpha < 4) continue;
+        for (let y = 0; y < h; y++) {
+            setPixel(rgba, w, h, x, y, core, core, 255, alpha);
+        }
+    }
+    return encodePng(w, h, rgba);
+}
+
+function generateSparkDot() {
+    const w = 16;
+    const h = 16;
+    const rgba = Buffer.alloc(w * h * 4, 0);
+    const c = 7.5;
+
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const dx = (x - c) / 7.2;
+            const dy = (y - c) / 7.2;
+            const r = Math.sqrt(dx * dx + dy * dy);
+            if (r >= 1.0) continue;
+            const glow = Math.pow(1.0 - r, 2.2);
+            const coreBoost = r < 0.28 ? 1.0 : glow;
+            const alpha = Math.min(255, Math.round(coreBoost * 252));
+            if (alpha > 4) {
+                const rgb = r < 0.32 ? 255 : 240;
+                setPixel(rgba, w, h, x, y, rgb, rgb, 255, alpha);
+            }
+        }
+    }
+    return encodePng(w, h, rgba);
+}
+
 function generateStarMote() {
     const w = 16;
     const h = 16;
@@ -161,31 +205,6 @@ function generateStarMote() {
             }
             if (alpha > 8) {
                 setPixel(rgba, w, h, x, y, 255, 255, 255, alpha);
-            }
-        }
-    }
-    return encodePng(w, h, rgba);
-}
-
-function generateGroundHalo() {
-    const w = 64;
-    const h = 64;
-    const rgba = Buffer.alloc(w * h * 4, 0);
-    const cx = 31.5;
-    const cy = 31.5;
-
-    for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-            const dx = (x - cx) / 31.5;
-            const dy = (y - cy) / 31.5;
-            const r = Math.sqrt(dx * dx + dy * dy);
-            if (r >= 1.0) continue;
-            const edgeFade = Math.max(0.0, Math.min(1.0, (1.0 - r) / 0.24));
-            const ring = Math.exp(-Math.pow((r - 0.60) / 0.27, 2)) * 0.72;
-            const inner = Math.max(0.0, 1.0 - r * 1.05) * 0.44;
-            const val = Math.min(1.0, (ring + inner) * edgeFade);
-            if (val > 0.008) {
-                setPixel(rgba, w, h, x, y, 255, 255, 255, val * 220);
             }
         }
     }
@@ -259,8 +278,9 @@ function generateMajesticBadgeIcon() {
 const targets = [
     ['textures/entity/aura_wisp.png', generateAuraWispStrip()],
     ['textures/entity/comet_ember.png', generateCometEmber()],
+    ['textures/entity/filament_strip.png', generateFilamentStrip()],
+    ['textures/entity/spark_dot.png', generateSparkDot()],
     ['textures/entity/star_mote.png', generateStarMote()],
-    ['textures/entity/ground_halo.png', generateGroundHalo()],
     ['textures/entity/area_glow.png', generateAreaGlow()],
     ['textures/gui/icon_majestic.png', generateMajesticBadgeIcon()]
 ];

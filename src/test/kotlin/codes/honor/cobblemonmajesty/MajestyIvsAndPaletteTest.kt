@@ -133,4 +133,23 @@ class MajestyIvsAndPaletteTest {
         assertEquals(50304, IrisShaderBridge.nearestShaderEntityId(0xFFE600))
         assertEquals(50310, IrisShaderBridge.nearestShaderEntityId(0x7B2CBF))
     }
+
+    @Test
+    fun baseTextureInversionPreservesAlphaAndDistinguishesVariants() {
+        assertEquals(0, MajestyPalette.invertPixelAbgr(0x00FF8844))
+
+        val normalBlue = (0xFF shl 24) or (0xC6 shl 16) or (0x72 shl 8) or 0x3E
+        val shinyGold = (0xFF shl 24) or (0x4B shl 16) or (0xCD shl 8) or 0xE6
+        val invNormal = MajestyPalette.invertPixelAbgr(normalBlue)
+        val invShiny = MajestyPalette.invertPixelAbgr(shinyGold)
+
+        assertEquals(0xFF, (invNormal ushr 24) and 0xFF)
+        assertEquals(0xFF, (invShiny ushr 24) and 0xFF)
+        assertNotEquals(invNormal, invShiny)
+
+        val pureWhite = (0xCC shl 24) or 0xFFFFFF
+        val invWhite = MajestyPalette.invertPixelAbgr(pureWhite)
+        assertEquals(0xCC, (invWhite ushr 24) and 0xFF)
+        assertTrue((invWhite and 0xFF) in 12..24)
+    }
 }

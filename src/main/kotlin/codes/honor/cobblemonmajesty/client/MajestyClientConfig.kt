@@ -33,7 +33,8 @@ object MajestyClientConfig {
 
     class AuraSection(builder: ModConfigSpec.Builder) {
         val enabled: ModConfigSpec.BooleanValue
-        val groundHaloEnabled: ModConfigSpec.BooleanValue
+        val invertBaseColors: ModConfigSpec.BooleanValue
+        val groundParticlesEnabled: ModConfigSpec.BooleanValue
         val starMotesEnabled: ModConfigSpec.BooleanValue
         val glowingEyesEnabled: ModConfigSpec.BooleanValue
         val auraLightEnabled: ModConfigSpec.BooleanValue
@@ -45,9 +46,12 @@ object MajestyClientConfig {
         val maxFullAurasOnScreen: ModConfigSpec.IntValue
 
         init {
-            builder.comment("Client rendering, shader eye/light toggles, LOD budget, and kill switch for Majestic auras.").push("aura")
+            builder.comment("Client rendering, base color inversion, shader eye/light toggles, LOD budget, and kill switch.").push("aura")
             enabled = builder.comment("Master client kill switch for all Majestic visual effects.").define("enabled", true)
-            groundHaloEnabled = builder.comment("Renders the merged dual-type gradient halo beneath Majestic Pokemon.").define("groundHaloEnabled", true)
+            invertBaseColors = builder.comment("Inverts the base model texture colors of Majestic Pokemon while preserving Shiny and resource-pack variants.")
+                .define("invertBaseColors", true)
+            groundParticlesEnabled = builder.comment("Renders low ground-sweeping helical filaments and fine spark motes around the feet of Majestic Pokemon.")
+                .define("groundParticlesEnabled", true)
             starMotesEnabled = builder.comment("Renders rising comet-embers and 4-point star sparkles around Majestic Pokemon.").define("starMotesEnabled", true)
             glowingEyesEnabled = builder.comment("Renders shader-compatible emissive eye glow on Majestic Pokemon.").define("glowingEyesEnabled", true)
             auraLightEnabled = builder.comment("Emits subtle aura-colored ground and area light readable by shaders.").define("auraLightEnabled", true)

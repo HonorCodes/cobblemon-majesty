@@ -9,6 +9,7 @@
   "client": [
     "client.PokemonRendererMixin",
     "client.PosableModelMixin",
+    "client.VaryingModelRepositoryMixin",
     "client.PokemonClientDelegateMixin",
     "client.SummaryMixin",
     "client.BattleOverlayMixin"

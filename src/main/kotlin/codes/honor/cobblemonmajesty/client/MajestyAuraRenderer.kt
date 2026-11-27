@@ -12,6 +12,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sin
+import kotlin.math.sqrt
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.LightTexture
 import net.minecraft.client.renderer.MultiBufferSource
@@ -22,9 +23,11 @@ import org.joml.Vector3f
 object MajestyAuraRenderer {
     private const val BASE_WISP_STRANDS = 6
     private const val WISP_FRAMES = 8
+    private const val GROUND_FILAMENTS = 4
+    private const val FILAMENT_SEGMENTS = 14
+    private const val GROUND_SPARKS = 10
     private const val COMET_EMBERS = 12
     private const val STAR_MOTES = 6
-    private const val HALO_SEGMENTS = 28
     private const val GOLDEN_ANGLE = 2.3999632f
 
     private val currentFrameDistances = ArrayList<Double>(32)
@@ -104,33 +107,53 @@ object MajestyAuraRenderer {
 
         val camLeft = Vector3f(camera.leftVector).normalize()
         val camUp = Vector3f(camera.upVector).normalize()
-        val toCamX = (camera.position.x - entPos.x).toFloat()
-        val toCamZ = (camera.position.z - entPos.z).toFloat()
-        val toCamHorizLen = kotlin.math.sqrt(toCamX * toCamX + toCamZ * toCamZ).coerceAtLeast(1e-4f)
-        val toCamDirX = toCamX / toCamHorizLen
-        val toCamDirZ = toCamZ / toCamHorizLen
+        val camRelX = (camera.position.x - entPos.x).toFloat()
+        val camRelY = (camera.position.y - entPos.y).toFloat()
+        val camRelZ = (camera.position.z - entPos.z).toFloat()
+        val toCamHorizLen = sqrt(camRelX * camRelX + camRelZ * camRelZ).coerceAtLeast(1e-4f)
+        val toCamDirX = camRelX / toCamHorizLen
+        val toCamDirZ = camRelZ / toCamHorizLen
 
         poseStack.pushPose()
         val matrix = poseStack.last().pose()
 
-        if (cfg.groundHaloEnabled.get() && entity.onGround()) {
-            renderSteadyMergedGroundHalo(
-                matrix = matrix,
-                consumer = bufferSource.getBuffer(MajestyRenderTypes.GROUND_HALO),
-                haloRadius = radius * 1.52f,
-                timeSeconds = timeSeconds,
-                colA = colA,
-                colB = colB,
-                alphaScale = sendoutScale
-            )
-        }
-
         val emitShaderLight = cfg.auraLightEnabled.get()
+        val drawGroundParticles = cfg.groundParticlesEnabled.get()
+        val drawUpperMotes = cfg.starMotesEnabled.get()
 
         for (strandParity in 0..1) {
             val strandRgb = if (strandParity == 0) rgbA else rgbB
             val strandCol = if (strandParity == 0) colA else colB
             IrisShaderBridge.withColoredEntity(strandRgb, emitShaderLight) {
+                if (drawGroundParticles) {
+                    renderGroundFilaments(
+                        matrix = matrix,
+                        consumer = bufferSource.getBuffer(MajestyRenderTypes.GROUND_FILAMENT),
+                        strandParity = strandParity,
+                        radius = radius,
+                        height = boxHeight,
+                        timeSeconds = timeSeconds,
+                        camRelX = camRelX,
+                        camRelY = camRelY,
+                        camRelZ = camRelZ,
+                        col = strandCol,
+                        alphaScale = sendoutScale
+                    )
+
+                    renderGroundSparks(
+                        matrix = matrix,
+                        consumer = bufferSource.getBuffer(MajestyRenderTypes.SPARK_DOT),
+                        strandParity = strandParity,
+                        radius = radius,
+                        height = boxHeight,
+                        timeSeconds = timeSeconds,
+                        camLeft = camLeft,
+                        camUp = camUp,
+                        col = strandCol,
+                        alphaScale = sendoutScale
+                    )
+                }
+
                 renderBaseWisps(
                     matrix = matrix,
                     consumer = bufferSource.getBuffer(MajestyRenderTypes.AURA_WISP),
@@ -145,7 +168,7 @@ object MajestyAuraRenderer {
                     alphaScale = sendoutScale
                 )
 
-                if (cfg.starMotesEnabled.get()) {
+                if (drawUpperMotes) {
                     renderCometEmbers(
                         matrix = matrix,
                         consumer = bufferSource.getBuffer(MajestyRenderTypes.COMET_EMBER),
@@ -178,83 +201,128 @@ object MajestyAuraRenderer {
         poseStack.popPose()
     }
 
-    private fun renderSteadyMergedGroundHalo(
+    private fun renderGroundFilaments(
         matrix: Matrix4f,
         consumer: VertexConsumer,
-        haloRadius: Float,
+        strandParity: Int,
+        radius: Float,
+        height: Float,
         timeSeconds: Float,
-        colA: FloatArray,
-        colB: FloatArray,
+        camRelX: Float,
+        camRelY: Float,
+        camRelZ: Float,
+        col: FloatArray,
         alphaScale: Float
     ) {
-        val rot = timeSeconds * 0.45f
-        val y = 0.024f
-        val pulse = 0.92f + 0.08f * sin(timeSeconds * 2.1f)
-        val innerAlpha = (0.14f * pulse * alphaScale).coerceIn(0f, 1f)
-        val midAlpha = (0.20f * pulse * alphaScale).coerceIn(0f, 1f)
+        val maxHalfWidth = min(0.042f, max(0.018f, radius * 0.042f))
+        val sweepHeight = min(0.68f, max(0.20f, height * 0.30f))
+        val strandSpan = 0.48f
 
-        val midR = (colA[0] + colB[0]) * 0.5f
-        val midG = (colA[1] + colB[1]) * 0.5f
-        val midB = (colA[2] + colB[2]) * 0.5f
+        val ptsX = FloatArray(FILAMENT_SEGMENTS + 1)
+        val ptsY = FloatArray(FILAMENT_SEGMENTS + 1)
+        val ptsZ = FloatArray(FILAMENT_SEGMENTS + 1)
+        val ptsW = FloatArray(FILAMENT_SEGMENTS + 1)
+        val ptsA = FloatArray(FILAMENT_SEGMENTS + 1)
 
-        val rMidFrac = 0.54f
-        val stepAngle = (2.0 * PI / HALO_SEGMENTS).toFloat()
+        for (fIdx in strandParity until GROUND_FILAMENTS step 2) {
+            val speed = 0.44f + (fIdx % 2) * 0.08f
+            val headU = (timeSeconds * speed + fIdx * (1.0f / GROUND_FILAMENTS)) % 1.0f
+            val spinDir = if (fIdx % 2 == 0) 0.55f else -0.55f
+            val baseTheta = fIdx * (2.0f * PI.toFloat() / GROUND_FILAMENTS) - timeSeconds * spinDir
 
-        for (i in 0 until HALO_SEGMENTS) {
-            val a0 = i * stepAngle
-            val a1 = (i + 1) * stepAngle
+            for (s in 0..FILAMENT_SEGMENTS) {
+                val frac = s.toFloat() / FILAMENT_SEGMENTS
+                val rawU = headU - frac * strandSpan
+                val wrappedU = ((rawU % 1.0f) + 1.0f) % 1.0f
+                val alongEnv = sin(frac * PI.toFloat())
+                val heightEnv = sin((wrappedU * 0.92f + 0.08f).coerceAtMost(1.0f) * PI.toFloat()).pow(0.65f)
+                val alpha = (alongEnv * heightEnv * 0.88f * alphaScale).coerceIn(0f, 1f)
 
-            val cos0 = cos(a0)
-            val sin0 = sin(a0)
-            val cos1 = cos(a1)
-            val sin1 = sin(a1)
+                val radialSpread = radius * (0.92f + 0.28f * sin(wrappedU * PI.toFloat()))
+                val theta = baseTheta + rawU * (2.0f * PI.toFloat() * 0.85f)
+                ptsX[s] = cos(theta) * radialSpread
+                ptsY[s] = 0.03f + wrappedU * sweepHeight
+                ptsZ[s] = sin(theta) * radialSpread
+                ptsW[s] = maxHalfWidth * (0.25f + 0.75f * alongEnv)
+                ptsA[s] = alpha
+            }
 
-            val b0 = angularSmoothBlend(a0 - rot)
-            val b1 = angularSmoothBlend(a1 - rot)
+            for (s in 0 until FILAMENT_SEGMENTS) {
+                val a0 = ptsA[s]
+                val a1 = ptsA[s + 1]
+                if (a0 <= 0.02f && a1 <= 0.02f) continue
 
-            val r0 = colA[0] + (colB[0] - colA[0]) * b0
-            val g0 = colA[1] + (colB[1] - colA[1]) * b0
-            val bl0 = colA[2] + (colB[2] - colA[2]) * b0
+                val dx = ptsX[s + 1] - ptsX[s]
+                val dy = ptsY[s + 1] - ptsY[s]
+                val dz = ptsZ[s + 1] - ptsZ[s]
+                if (dx * dx + dy * dy + dz * dz > radius * radius * 1.5f) continue
 
-            val r1 = colA[0] + (colB[0] - colA[0]) * b1
-            val g1 = colA[1] + (colB[1] - colA[1]) * b1
-            val bl1 = colA[2] + (colB[2] - colA[2]) * b1
+                val vx0 = camRelX - ptsX[s]
+                val vy0 = camRelY - ptsY[s]
+                val vz0 = camRelZ - ptsZ[s]
 
-            val xm0 = cos0 * haloRadius * rMidFrac
-            val zm0 = sin0 * haloRadius * rMidFrac
-            val xm1 = cos1 * haloRadius * rMidFrac
-            val zm1 = sin1 * haloRadius * rMidFrac
+                var px = dy * vz0 - dz * vy0
+                var py = dz * vx0 - dx * vz0
+                var pz = dx * vy0 - dy * vx0
+                val pLen = sqrt(px * px + py * py + pz * pz)
+                if (pLen < 1e-5f) continue
+                px /= pLen
+                py /= pLen
+                pz /= pLen
 
-            val um0 = 0.5f + 0.5f * cos0 * rMidFrac
-            val vm0 = 0.5f + 0.5f * sin0 * rMidFrac
-            val um1 = 0.5f + 0.5f * cos1 * rMidFrac
-            val vm1 = 0.5f + 0.5f * sin1 * rMidFrac
+                val w0 = ptsW[s]
+                val w1 = ptsW[s + 1]
 
-            emitVertex(matrix, consumer, 0f, y, 0f, 0.5f, 0.5f, midR, midG, midB, innerAlpha)
-            emitVertex(matrix, consumer, 0f, y, 0f, 0.5f, 0.5f, midR, midG, midB, innerAlpha)
-            emitVertex(matrix, consumer, xm1, y, zm1, um1, vm1, r1, g1, bl1, midAlpha)
-            emitVertex(matrix, consumer, xm0, y, zm0, um0, vm0, r0, g0, bl0, midAlpha)
-
-            val xo0 = cos0 * haloRadius
-            val zo0 = sin0 * haloRadius
-            val xo1 = cos1 * haloRadius
-            val zo1 = sin1 * haloRadius
-
-            val uo0 = 0.5f + 0.5f * cos0
-            val vo0 = 0.5f + 0.5f * sin0
-            val uo1 = 0.5f + 0.5f * cos1
-            val vo1 = 0.5f + 0.5f * sin1
-
-            emitVertex(matrix, consumer, xm0, y, zm0, um0, vm0, r0, g0, bl0, midAlpha)
-            emitVertex(matrix, consumer, xm1, y, zm1, um1, vm1, r1, g1, bl1, midAlpha)
-            emitVertex(matrix, consumer, xo1, y, zo1, uo1, vo1, r1, g1, bl1, 0f)
-            emitVertex(matrix, consumer, xo0, y, zo0, uo0, vo0, r0, g0, bl0, 0f)
+                emitVertex(matrix, consumer, ptsX[s] - px * w0, ptsY[s] - py * w0, ptsZ[s] - pz * w0, 0f, 0f, col[0], col[1], col[2], a0)
+                emitVertex(matrix, consumer, ptsX[s] + px * w0, ptsY[s] + py * w0, ptsZ[s] + pz * w0, 1f, 0f, col[0], col[1], col[2], a0)
+                emitVertex(matrix, consumer, ptsX[s + 1] + px * w1, ptsY[s + 1] + py * w1, ptsZ[s + 1] + pz * w1, 1f, 1f, col[0], col[1], col[2], a1)
+                emitVertex(matrix, consumer, ptsX[s + 1] - px * w1, ptsY[s + 1] - py * w1, ptsZ[s + 1] - pz * w1, 0f, 1f, col[0], col[1], col[2], a1)
+            }
         }
     }
 
-    private fun angularSmoothBlend(deltaAngle: Float): Float {
-        val raw = 0.5f + 0.5f * cos(deltaAngle)
-        return raw * raw * (3f - 2f * raw)
+    private fun renderGroundSparks(
+        matrix: Matrix4f,
+        consumer: VertexConsumer,
+        strandParity: Int,
+        radius: Float,
+        height: Float,
+        timeSeconds: Float,
+        camLeft: Vector3f,
+        camUp: Vector3f,
+        col: FloatArray,
+        alphaScale: Float
+    ) {
+        val baseSize = min(0.052f, max(0.024f, radius * 0.048f))
+        val maxSparkY = min(0.62f, max(0.20f, height * 0.28f))
+
+        for (i in strandParity until GROUND_SPARKS step 2) {
+            val speed = 0.45f + (i % 3) * 0.14f
+            val cycle = (timeSeconds * speed + i * (1.0f / GROUND_SPARKS)) % 1.0f
+            val twinkle = sin(cycle * PI.toFloat()) * (0.72f + 0.28f * cos(timeSeconds * 6.2f + i * 1.9f))
+            val alpha = (twinkle * 0.94f * alphaScale).coerceIn(0f, 1f)
+            if (alpha <= 0.05f) continue
+
+            val spread = 0.88f + 0.36f * (((i * 3) % 4) / 3.0f)
+            val angle = i * GOLDEN_ANGLE - timeSeconds * 0.48f
+            val r = radius * spread
+            val cx = cos(angle) * r
+            val cy = 0.035f + cycle * maxSparkY
+            val cz = sin(angle) * r
+            val size = baseSize * (0.75f + 0.35f * sin(cycle * PI.toFloat()))
+
+            val lx = camLeft.x * size
+            val ly = camLeft.y * size
+            val lz = camLeft.z * size
+            val ux = camUp.x * size
+            val uy = camUp.y * size
+            val uz = camUp.z * size
+
+            emitVertex(matrix, consumer, cx - lx + ux, cy - ly + uy, cz - lz + uz, 0f, 0f, col[0], col[1], col[2], alpha)
+            emitVertex(matrix, consumer, cx - lx - ux, cy - ly - uy, cz - lz - uz, 0f, 1f, col[0], col[1], col[2], alpha)
+            emitVertex(matrix, consumer, cx + lx - ux, cy + ly - uy, cz + lz - uz, 1f, 1f, col[0], col[1], col[2], alpha)
+            emitVertex(matrix, consumer, cx + lx + ux, cy + ly + uy, cz + lz + uz, 1f, 0f, col[0], col[1], col[2], alpha)
+        }
     }
 
     private fun renderBaseWisps(

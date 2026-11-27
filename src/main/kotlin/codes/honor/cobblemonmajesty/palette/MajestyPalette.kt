@@ -79,4 +79,18 @@ object MajestyPalette {
         val nb = (b + ((255 - b) * f)).toInt().coerceIn(0, 255)
         return (nr shl 16) or (ng shl 8) or nb
     }
+
+    fun invertPixelAbgr(pixel: Int): Int {
+        val alpha = (pixel ushr 24) and 0xFF
+        if (alpha == 0) return 0
+        val inv = pixel xor 0x00FFFFFF
+        val c0 = liftInvertedChannel(inv and 0xFF)
+        val c1 = liftInvertedChannel((inv ushr 8) and 0xFF)
+        val c2 = liftInvertedChannel((inv ushr 16) and 0xFF)
+        return (alpha shl 24) or (c2 shl 16) or (c1 shl 8) or c0
+    }
+
+    private fun liftInvertedChannel(c: Int): Int {
+        return (c + ((240 - c) * 18) / 255).coerceIn(0, 255)
+    }
 }

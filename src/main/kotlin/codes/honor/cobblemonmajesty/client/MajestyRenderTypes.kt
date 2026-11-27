@@ -12,10 +12,12 @@ object MajestyRenderTypes : RenderStateShard("cobblemon_majesty_shards", Runnabl
         ResourceLocation.fromNamespaceAndPath(CobblemonMajesty.ID, "textures/entity/aura_wisp.png")
     val COMET_TEXTURE: ResourceLocation =
         ResourceLocation.fromNamespaceAndPath(CobblemonMajesty.ID, "textures/entity/comet_ember.png")
+    val FILAMENT_TEXTURE: ResourceLocation =
+        ResourceLocation.fromNamespaceAndPath(CobblemonMajesty.ID, "textures/entity/filament_strip.png")
+    val SPARK_DOT_TEXTURE: ResourceLocation =
+        ResourceLocation.fromNamespaceAndPath(CobblemonMajesty.ID, "textures/entity/spark_dot.png")
     val STAR_TEXTURE: ResourceLocation =
         ResourceLocation.fromNamespaceAndPath(CobblemonMajesty.ID, "textures/entity/star_mote.png")
-    val HALO_TEXTURE: ResourceLocation =
-        ResourceLocation.fromNamespaceAndPath(CobblemonMajesty.ID, "textures/entity/ground_halo.png")
     val AREA_GLOW_TEXTURE: ResourceLocation =
         ResourceLocation.fromNamespaceAndPath(CobblemonMajesty.ID, "textures/entity/area_glow.png")
     val SUMMARY_BADGE_TEXTURE: ResourceLocation =
@@ -23,8 +25,9 @@ object MajestyRenderTypes : RenderStateShard("cobblemon_majesty_shards", Runnabl
 
     val AURA_WISP: RenderType = createBillboardLayer("cobblemon_majesty_wisp", WISP_TEXTURE)
     val COMET_EMBER: RenderType = createBillboardLayer("cobblemon_majesty_comet", COMET_TEXTURE)
+    val GROUND_FILAMENT: RenderType = createBillboardLayer("cobblemon_majesty_filament", FILAMENT_TEXTURE)
+    val SPARK_DOT: RenderType = createBillboardLayer("cobblemon_majesty_spark_dot", SPARK_DOT_TEXTURE)
     val STAR_MOTE: RenderType = createBillboardLayer("cobblemon_majesty_star", STAR_TEXTURE)
-    val GROUND_HALO: RenderType = createBillboardLayer("cobblemon_majesty_halo", HALO_TEXTURE)
     val AREA_LIGHT: RenderType = RenderType.eyes(AREA_GLOW_TEXTURE)
 
     private fun createBillboardLayer(name: String, texture: ResourceLocation): RenderType {

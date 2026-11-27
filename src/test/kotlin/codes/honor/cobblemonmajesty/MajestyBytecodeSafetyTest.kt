@@ -136,6 +136,10 @@ class MajestyBytecodeSafetyTest {
             "com/cobblemon/mod/common/client/render/models/blockbench/PosableModel.class" to listOf(
                 "render:(Lcom/cobblemon/mod/common/client/render/models/blockbench/repository/RenderContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V"
             ),
+            "com/cobblemon/mod/common/client/render/models/blockbench/repository/VaryingModelRepository.class" to listOf(
+                "getTexture:(Lnet/minecraft/resources/ResourceLocation;Lcom/cobblemon/mod/common/client/render/models/blockbench/PosableState;)Lnet/minecraft/resources/ResourceLocation;",
+                "getTextureNoSubstitute:(Lnet/minecraft/resources/ResourceLocation;Lcom/cobblemon/mod/common/client/render/models/blockbench/PosableState;)Lnet/minecraft/resources/ResourceLocation;"
+            ),
             "com/cobblemon/mod/common/client/entity/PokemonClientDelegate.class" to listOf(
                 "tick:(Lcom/cobblemon/mod/common/entity/pokemon/PokemonEntity;)V"
             ),

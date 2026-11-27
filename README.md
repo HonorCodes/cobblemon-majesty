@@ -2,13 +2,13 @@
 
 **Cobblemon Majesty** introduces **Majestic** Pokémon variants for **Cobblemon 1.8.4** on **NeoForge 1.21.1**.
 
-Majestic is an independent global variant flag (`majestic`) that stacks seamlessly with **Shiny**, **Alpha**, **Lucky**, Mega Evolution, Terastallization, and custom model/texture packs. Rather than replacing a Pokémon's skin, it renders an animated, dual-strand elemental aura in the Pokémon's own type colors, shader-blooming eyes, subtle aura-tinted ground lighting, and a configurable **1.1x final damage bonus** on moves matching its active natural types.
+Majestic is an independent global variant flag (`majestic`) that stacks seamlessly with **Shiny**, **Alpha**, **Lucky**, Mega Evolution, Terastallization, and custom model/texture packs. It inverts a Pokémon's resolved base palette at runtime, surrounds it with a dual-strand elemental aura in its own type colors, adds shader-blooming eyes and subtle aura-tinted ground lighting, and grants a configurable **1.1x final damage bonus** on moves matching its active natural types.
 
 ## Features
 
-- **100% Variant Stacking**: Registered as a synchronized global `FlagSpeciesFeature` and aspect (`majestic`) with zero `ModelVariationSet` overrides—every Shiny, Lucky, Alpha, or resource-pack texture stays intact underneath.
-- **Non-Averaged Dual-Type Auras**: Dual-type Pokémon weave both of their elemental type colors as distinct low silhouette-framing base wisps, rising comet-embers, 4-point star sparkles, and a smoothly merged steady polar gradient ground halo (for example, a Steel/Fighting Lucario radiates distinct Metallic Silver and Martial Red particles rather than a blended pink average). Mono-type Pokémon pair their primary aura hue with a harmonic accent shade.
-- **Shader-Compatible Eye Glow & Area Light**: Renders emissive eye glow via `RenderType.eyes` (`gbuffers_spidereyes` HDR bloom in BSL and Complementary, respecting Cobblemon blink animations) and casts subtle aura-colored ground and area illumination onto surrounding terrain (including per-strand colored entity light tags for Iris and Complementary/Euphoria voxel lighting).
+- **100% Variant Stacking + Runtime Color Inversion**: Registered as a synchronized global `FlagSpeciesFeature` and aspect (`majestic`) with zero static `ModelVariationSet` overrides. On the client, `VaryingModelRepository` dynamically caches an RGB-inverted `DynamicTexture` of whatever skin Cobblemon resolved—so Shiny, Lucky, Alpha, Mega, and custom resource-pack skins all invert into unique palettes (toggleable via `aura.invertBaseColors`).
+- **Non-Averaged Dual-Type Auras & Ground Sweeps**: Dual-type Pokémon weave both of their elemental type colors as low ground-skimming helical filaments, fine ground spark motes, silhouette-framing wisps, rising comet-embers, and 4-point star sparkles (for example, a Steel/Fighting Lucario radiates distinct Metallic Silver and Martial Red strands rather than a blended pink average). Mono-type Pokémon pair their primary aura hue with a harmonic accent shade.
+- **Shader-Compatible Eye Glow & Ringless Area Light**: Renders emissive eye glow via `RenderType.eyes` (`gbuffers_spidereyes` HDR bloom in BSL and Complementary, respecting Cobblemon blink animations) and casts a soft, ringless aura-colored ground light pool onto surrounding terrain (including per-strand colored entity light tags for Iris and Complementary/Euphoria voxel lighting).
 - **Server-Side Showdown Mastery**: Hooks Cobblemon's server-side Pokémon Showdown `ModifyDamage` stage (`1.1x` default, stacking multiplicatively after STAB: `1.5x -> 1.65x`, `2.0x -> 2.20x`) for moves matching active natural types (including Mega Evolution, form swaps, and Protean/Libero, while excluding Tera-added types and fixed-damage moves). Can also be toggled to purely aesthetic mode in the config.
 - **Natural & Trainer Encounters**: Rolls `1 in 6,000` by default across wild spawns, fishing, PokéSnacks, fossils, starters, and NPC/Trainer teams (including Radical Cobblemon Trainers), granting `+2` additional `31` IVs on top of existing perfect IVs, a resonant wild encounter chime, and `✦` badges on world nameplates, battle HUD tiles, and the Summary screen.
 
@@ -40,7 +40,8 @@ In trainer JSON definitions (such as `rctmod`), add `"majestic"` to a team membe
 ### `config/cobblemon_majesty-client.toml`
 
 - `aura.enabled` (`true`) — Master client kill switch for all Majestic visuals and audio.
-- `aura.groundHaloEnabled`, `starMotesEnabled`, `glowingEyesEnabled`, `auraLightEnabled`, `wildChimeEnabled`, `nameplateBadgeEnabled`, `summaryBadgeEnabled` (`true`).
+- `aura.invertBaseColors` (`true`) — Inverts the resolved base model texture of Majestic Pokémon in the world and 3D portraits.
+- `aura.groundParticlesEnabled`, `starMotesEnabled`, `glowingEyesEnabled`, `auraLightEnabled`, `wildChimeEnabled`, `nameplateBadgeEnabled`, `summaryBadgeEnabled` (`true`).
 - `aura.auraLightIntensity` (`1.0`) — Relative brightness scale for the subtle colored ground and area light.
 - `aura.fullAuraDistance` (`32.0`), `maxFullAurasOnScreen` (`16`).
 - `palette.<type>.primary` and `palette.<type>.accent` — Custom `#RRGGBB` hex colors for all 18 Pokémon types.
