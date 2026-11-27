@@ -33,35 +33,34 @@ object MajestyClientConfig {
 
     class AuraSection(builder: ModConfigSpec.Builder) {
         val enabled: ModConfigSpec.BooleanValue
-        val bodySheenEnabled: ModConfigSpec.BooleanValue
-        val summarySheenEnabled: ModConfigSpec.BooleanValue
         val groundHaloEnabled: ModConfigSpec.BooleanValue
         val starMotesEnabled: ModConfigSpec.BooleanValue
+        val glowingEyesEnabled: ModConfigSpec.BooleanValue
+        val auraLightEnabled: ModConfigSpec.BooleanValue
+        val auraLightIntensity: ModConfigSpec.DoubleValue
         val wildChimeEnabled: ModConfigSpec.BooleanValue
         val nameplateBadgeEnabled: ModConfigSpec.BooleanValue
         val summaryBadgeEnabled: ModConfigSpec.BooleanValue
         val fullAuraDistance: ModConfigSpec.DoubleValue
-        val simpleSheenDistance: ModConfigSpec.DoubleValue
         val maxFullAurasOnScreen: ModConfigSpec.IntValue
 
         init {
-            builder.comment("Client rendering, LOD budget, and kill switch for Majestic auras.").push("aura")
+            builder.comment("Client rendering, shader eye/light toggles, LOD budget, and kill switch for Majestic auras.").push("aura")
             enabled = builder.comment("Master client kill switch for all Majestic visual effects.").define("enabled", true)
-            bodySheenEnabled = builder.comment("Renders dual-strand scrolling energy veins on Majestic models.").define("bodySheenEnabled", true)
-            summarySheenEnabled = builder.comment("Renders the subtle energy sheen on 3D portraits in Summary and Party UIs.")
-                .define("summarySheenEnabled", true)
-            groundHaloEnabled = builder.comment("Renders the two-color ground glow halo beneath Majestic Pokemon.").define("groundHaloEnabled", true)
-            starMotesEnabled = builder.comment("Renders rising 4-point star sparkles around Majestic Pokemon.").define("starMotesEnabled", true)
+            groundHaloEnabled = builder.comment("Renders the merged dual-type gradient halo beneath Majestic Pokemon.").define("groundHaloEnabled", true)
+            starMotesEnabled = builder.comment("Renders rising comet-embers and 4-point star sparkles around Majestic Pokemon.").define("starMotesEnabled", true)
+            glowingEyesEnabled = builder.comment("Renders shader-compatible emissive eye glow on Majestic Pokemon.").define("glowingEyesEnabled", true)
+            auraLightEnabled = builder.comment("Emits subtle aura-colored ground and area light readable by shaders.").define("auraLightEnabled", true)
+            auraLightIntensity = builder.comment("Relative brightness scale for the subtle colored ground and area light.")
+                .defineInRange("auraLightIntensity", 1.0, 0.1, 2.5)
             wildChimeEnabled = builder.comment("Plays a resonant harmonic chime when spotting an unowned wild Majestic Pokemon.")
                 .define("wildChimeEnabled", true)
             nameplateBadgeEnabled = builder.comment("Shows the gold star mark on world and battle HUD nameplates.").define("nameplateBadgeEnabled", true)
             summaryBadgeEnabled = builder.comment("Shows the Majestic badge and tooltip in the Cobblemon Summary screen.")
                 .define("summaryBadgeEnabled", true)
-            fullAuraDistance = builder.comment("Maximum distance in blocks for full silhouette wisps, star motes, and ground halo.")
+            fullAuraDistance = builder.comment("Maximum distance in blocks for Majestic auras, eye glow, and ground lighting.")
                 .defineInRange("fullAuraDistance", 32.0, 4.0, 128.0)
-            simpleSheenDistance = builder.comment("Maximum distance in blocks for the lightweight model energy sheen.")
-                .defineInRange("simpleSheenDistance", 64.0, 8.0, 256.0)
-            maxFullAurasOnScreen = builder.comment("Maximum number of full silhouette wisp auras rendered per frame (nearest first).")
+            maxFullAurasOnScreen = builder.comment("Maximum number of full Majestic auras rendered per frame (nearest first).")
                 .defineInRange("maxFullAurasOnScreen", 16, 1, 128)
             builder.pop()
         }

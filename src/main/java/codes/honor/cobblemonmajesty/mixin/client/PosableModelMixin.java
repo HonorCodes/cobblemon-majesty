@@ -1,6 +1,6 @@
 package codes.honor.cobblemonmajesty.mixin.client;
 
-import codes.honor.cobblemonmajesty.client.MajestyModelSheenRenderer;
+import codes.honor.cobblemonmajesty.client.MajestyEyeGlowRenderer;
 import com.cobblemon.mod.common.client.render.models.blockbench.PosableModel;
 import com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -17,7 +17,7 @@ public abstract class PosableModelMixin {
         at = @At("TAIL"),
         require = 1
     )
-    private void cobblemonMajesty$renderModelSheen(
+    private void cobblemonMajesty$renderModelEyeGlow(
         RenderContext context,
         PoseStack stack,
         VertexConsumer buffer,
@@ -26,6 +26,6 @@ public abstract class PosableModelMixin {
         int color,
         CallbackInfo ci
     ) {
-        MajestyModelSheenRenderer.renderModelSheen((PosableModel) (Object) this, context, stack, packedOverlay, color);
+        MajestyEyeGlowRenderer.renderModelEyeGlow((PosableModel) (Object) this, context, stack, packedOverlay, color);
     }
 }

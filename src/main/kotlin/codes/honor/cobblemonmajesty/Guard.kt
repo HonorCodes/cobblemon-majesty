@@ -9,10 +9,23 @@ class Guard(private val name: String) {
         try {
             block()
         } catch (e: Exception) {
-            val count = failures.incrementAndGet()
-            if (count == 1L || count % 1000L == 0L) {
-                CobblemonMajesty.LOGGER.error("{} failed, {} times so far", name, count, e)
-            }
+            recordFailure(e)
+        }
+    }
+
+    fun <T> callOrNull(block: () -> T?): T? {
+        return try {
+            block()
+        } catch (e: Exception) {
+            recordFailure(e)
+            null
+        }
+    }
+
+    private fun recordFailure(e: Exception) {
+        val count = failures.incrementAndGet()
+        if (count == 1L || count % 1000L == 0L) {
+            CobblemonMajesty.LOGGER.error("{} failed, {} times so far", name, count, e)
         }
     }
 }

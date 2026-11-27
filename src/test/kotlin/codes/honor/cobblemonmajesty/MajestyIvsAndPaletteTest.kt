@@ -1,6 +1,8 @@
 package codes.honor.cobblemonmajesty
 
+import codes.honor.cobblemonmajesty.client.IrisShaderBridge
 import codes.honor.cobblemonmajesty.feature.MajestyIvs
+import codes.honor.cobblemonmajesty.palette.EyeBoneClassifier
 import codes.honor.cobblemonmajesty.palette.MajestyPalette
 import codes.honor.cobblemonmajesty.palette.TypeColorPair
 import kotlin.random.Random
@@ -94,5 +96,41 @@ class MajestyIvsAndPaletteTest {
         assertEquals(0xE63946, TypeColorPair.parseHexRgb("e63946"))
         assertNull(TypeColorPair.parseHexRgb("#ZZZZZZ"))
         assertNull(TypeColorPair.parseHexRgb("#123"))
+    }
+
+    @Test
+    fun eyeBoneClassifierMatchesEyesAndPupilsWhileExcludingLidsAndSpecies() {
+        assertEquals(EyeBoneClassifier.Role.SCLERA_OR_EYE, EyeBoneClassifier.classify("eye_left", "lucario"))
+        assertEquals(EyeBoneClassifier.Role.SCLERA_OR_EYE, EyeBoneClassifier.classify("right_eye", "raikou"))
+        assertEquals(EyeBoneClassifier.Role.SCLERA_OR_EYE, EyeBoneClassifier.classify("lefteye", "pikachu"))
+        assertEquals(EyeBoneClassifier.Role.SCLERA_OR_EYE, EyeBoneClassifier.classify("eyeright", "pikachu"))
+        assertEquals(EyeBoneClassifier.Role.SCLERA_OR_EYE, EyeBoneClassifier.classify("eyes_open", "arcanine"))
+        assertEquals(EyeBoneClassifier.Role.SCLERA_OR_EYE, EyeBoneClassifier.classify("eye_left2", "dodrio"))
+
+        assertEquals(EyeBoneClassifier.Role.PUPIL_OR_IRIS, EyeBoneClassifier.classify("pupil_left", "articuno"))
+        assertEquals(EyeBoneClassifier.Role.PUPIL_OR_IRIS, EyeBoneClassifier.classify("right_pupil", "zapdos"))
+        assertEquals(EyeBoneClassifier.Role.PUPIL_OR_IRIS, EyeBoneClassifier.classify("iris_left", "gardevoir"))
+
+        assertEquals(EyeBoneClassifier.Role.NONE, EyeBoneClassifier.classify("eyelid_left", "lucario"))
+        assertEquals(EyeBoneClassifier.Role.NONE, EyeBoneClassifier.classify("eye_right_lid", "furret"))
+        assertEquals(EyeBoneClassifier.Role.NONE, EyeBoneClassifier.classify("eyes_closed", "arcanine"))
+        assertEquals(EyeBoneClassifier.Role.NONE, EyeBoneClassifier.classify("eyebrow_left", "machamp"))
+        assertEquals(EyeBoneClassifier.Role.NONE, EyeBoneClassifier.classify("locator_eye_left", "articuno"))
+        assertEquals(EyeBoneClassifier.Role.NONE, EyeBoneClassifier.classify("sableye", "sableye"))
+        assertEquals(EyeBoneClassifier.Role.NONE, EyeBoneClassifier.classify("decidueye", "decidueye"))
+    }
+
+    @Test
+    fun irisColoredEntityIdsStayWithinShaderRange() {
+        for ((_, pair) in MajestyPalette.DEFAULTS) {
+            val idPrimary = IrisShaderBridge.nearestShaderEntityId(pair.primaryRgb)
+            val idAccent = IrisShaderBridge.nearestShaderEntityId(pair.accentRgb)
+            assertTrue(idPrimary in 50300..50312, "Out of range shader entityId: $idPrimary")
+            assertTrue(idAccent in 50300..50312, "Out of range shader entityId: $idAccent")
+        }
+        assertEquals(50302, IrisShaderBridge.nearestShaderEntityId(0xE63946))
+        assertEquals(50300, IrisShaderBridge.nearestShaderEntityId(0xD8E4F0))
+        assertEquals(50304, IrisShaderBridge.nearestShaderEntityId(0xFFE600))
+        assertEquals(50310, IrisShaderBridge.nearestShaderEntityId(0x7B2CBF))
     }
 }

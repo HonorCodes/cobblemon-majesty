@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -72,8 +71,8 @@ function setPixel(buf, width, height, x, y, r, g, b, a) {
 
 function generateAuraWispStrip() {
     const frames = 8;
-    const fw = 16;
-    const fh = 16;
+    const fw = 32;
+    const fh = 32;
     const totalH = fh * frames;
     const rgba = Buffer.alloc(fw * totalH * 4, 0);
 
@@ -82,39 +81,56 @@ function generateAuraWispStrip() {
         const yBase = f * fh;
         for (let y = 1; y < fh - 1; y++) {
             const v = 1 - y / (fh - 1);
-            const centerShift = Math.sin(phase + v * 4.2) * (1.8 + (1 - v) * 0.9);
-            const cx = 7.5 + centerShift;
-            const halfWidth = 0.85 + Math.sin(v * Math.PI) * 2.15;
-            const verticalEnv = Math.sin(v * Math.PI);
+            const env = Math.sin(v * Math.PI);
+            if (env <= 0.01) continue;
+            const halfWidth = 4.6 * Math.pow(env, 0.85);
+            const spineX = 15.5 + Math.sin(phase + v * 3.6) * (2.2 * env);
 
             for (let x = 0; x < fw; x++) {
-                const dist = Math.abs(x - cx);
-                if (dist > halfWidth + 0.9) continue;
-                const radial = Math.max(0, 1 - dist / (halfWidth + 0.75));
-                const quantized = Math.floor(radial * 4) / 4;
-                const alpha = Math.min(1, quantized * verticalEnv * 1.15);
-                if (alpha < 0.14) continue;
-                const coreBoost = dist < 0.75 && v > 0.22 && v < 0.78 ? 255 : 238;
-                setPixel(rgba, fw, totalH, x, yBase + y, coreBoost, coreBoost, 255, alpha * 245);
+                const dist = Math.abs(x - spineX);
+                const norm = dist / (halfWidth + 0.95);
+                if (norm >= 1.0) continue;
+                const radial = Math.pow(1.0 - norm * norm, 1.65);
+                const alpha = Math.min(1.0, env * radial * 1.08);
+                if (alpha < 0.012) continue;
+                const coreMix = Math.max(0.0, 1.0 - dist / Math.max(0.9, halfWidth * 0.55)) * env;
+                const brightness = 232 + 23 * Math.min(1.0, coreMix);
+                setPixel(rgba, fw, totalH, x, yBase + y, brightness, brightness, 255, alpha * 245);
             }
         }
     }
     return encodePng(fw, totalH, rgba);
 }
 
-function generateBodyVeins(direction) {
-    const w = 32;
+function generateCometEmber() {
+    const w = 16;
     const h = 32;
     const rgba = Buffer.alloc(w * h * 4, 0);
+    const hx = 7.5;
+    const hy = 7.5;
 
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-            const u = (x + direction * y * 0.75 + 64) % 16;
-            const wave = Math.sin((y / h) * Math.PI * 2 * 2 + (direction > 0 ? 0.5 : 2.1)) * 2.1;
-            const bandDist = Math.abs((u - 8) + wave);
-            if (bandDist < 1.15) {
-                const intensity = bandDist < 0.45 ? 215 : 125;
-                setPixel(rgba, w, h, x, y, 250, 252, 255, intensity);
+            const dx = x - hx;
+            if (y <= hy) {
+                const dy = (y - hy) / 3.8;
+                const r = Math.sqrt(Math.pow(dx / 3.6, 2) + dy * dy);
+                if (r < 1.0) {
+                    const fall = Math.pow(1.0 - r * r, 1.45);
+                    const core = 235 + 20 * Math.max(0.0, 1.0 - r * 1.25);
+                    setPixel(rgba, w, h, x, y, core, core, 255, fall * 252);
+                }
+            } else {
+                const t = (y - hy) / 22.0;
+                if (t >= 1.0) continue;
+                const halfTail = 3.2 * Math.pow(1.0 - t, 1.15);
+                const norm = Math.abs(dx) / Math.max(0.55, halfTail + 0.55);
+                if (norm < 1.0) {
+                    const fall = Math.pow(1.0 - norm * norm, 1.55) * Math.pow(1.0 - t, 1.3);
+                    if (fall < 0.01) continue;
+                    const core = 228 + 27 * Math.max(0.0, (1.0 - t * 1.5) * (1.0 - norm));
+                    setPixel(rgba, w, h, x, y, core, core, 255, fall * 242);
+                }
             }
         }
     }
@@ -132,15 +148,18 @@ function generateStarMote() {
             const dx = Math.abs(x - c);
             const dy = Math.abs(y - c);
             let alpha = 0;
-            if (dx <= 0.6 && dy <= 0.6) {
+            if (dx <= 0.65 && dy <= 0.65) {
                 alpha = 255;
-            } else if ((dx <= 0.6 && dy <= 4.6) || (dy <= 0.6 && dx <= 4.6)) {
-                const arm = 1 - Math.max(dx, dy) / 5.2;
-                alpha = Math.round(arm * 235);
-            } else if (dx <= 1.6 && dy <= 1.6) {
-                alpha = 150;
+            } else if ((dx <= 0.7 && dy <= 5.2) || (dy <= 0.7 && dx <= 5.2)) {
+                const arm = Math.pow(Math.max(0, 1 - Math.max(dx, dy) / 5.5), 1.35);
+                alpha = Math.round(arm * 240);
+            } else {
+                const r = Math.sqrt(dx * dx + dy * dy);
+                if (r < 2.6) {
+                    alpha = Math.round(Math.pow(1 - r / 2.6, 1.8) * 165);
+                }
             }
-            if (alpha > 20) {
+            if (alpha > 8) {
                 setPixel(rgba, w, h, x, y, 255, 255, 255, alpha);
             }
         }
@@ -149,23 +168,49 @@ function generateStarMote() {
 }
 
 function generateGroundHalo() {
-    const w = 32;
-    const h = 32;
+    const w = 64;
+    const h = 64;
     const rgba = Buffer.alloc(w * h * 4, 0);
-    const cx = 15.5;
-    const cy = 15.5;
+    const cx = 31.5;
+    const cy = 31.5;
 
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-            const dx = (x - cx) / 15.5;
-            const dy = (y - cy) / 15.5;
+            const dx = (x - cx) / 31.5;
+            const dy = (y - cy) / 31.5;
             const r = Math.sqrt(dx * dx + dy * dy);
-            if (r > 1.0) continue;
-            const ring = Math.exp(-Math.pow((r - 0.58) / 0.24, 2));
-            const center = Math.max(0, 1 - r * 1.15) * 0.45;
-            const stepped = Math.floor((ring * 0.75 + center) * 6) / 6;
-            if (stepped > 0.08) {
-                setPixel(rgba, w, h, x, y, 255, 255, 255, stepped * 190);
+            if (r >= 1.0) continue;
+            const edgeFade = Math.max(0.0, Math.min(1.0, (1.0 - r) / 0.24));
+            const ring = Math.exp(-Math.pow((r - 0.60) / 0.27, 2)) * 0.72;
+            const inner = Math.max(0.0, 1.0 - r * 1.05) * 0.44;
+            const val = Math.min(1.0, (ring + inner) * edgeFade);
+            if (val > 0.008) {
+                setPixel(rgba, w, h, x, y, 255, 255, 255, val * 220);
+            }
+        }
+    }
+    return encodePng(w, h, rgba);
+}
+
+function generateAreaGlow() {
+    const w = 64;
+    const h = 64;
+    const rgba = Buffer.alloc(w * h * 4, 0);
+    const cx = 31.5;
+    const cy = 31.5;
+
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const dx = (x - cx) / 31.5;
+            const dy = (y - cy) / 31.5;
+            const r = Math.sqrt(dx * dx + dy * dy);
+            if (r >= 1.0) continue;
+            const edge = Math.pow(1.0 - r * r, 1.85);
+            const gaussian = Math.exp(-Math.pow(r / 0.62, 2));
+            const intensity = Math.min(1.0, gaussian * edge);
+            const byteVal = Math.round(intensity * 255);
+            if (byteVal > 0) {
+                setPixel(rgba, w, h, x, y, byteVal, byteVal, byteVal, byteVal);
             }
         }
     }
@@ -213,10 +258,10 @@ function generateMajesticBadgeIcon() {
 
 const targets = [
     ['textures/entity/aura_wisp.png', generateAuraWispStrip()],
-    ['textures/entity/body_veins_a.png', generateBodyVeins(1)],
-    ['textures/entity/body_veins_b.png', generateBodyVeins(-1)],
+    ['textures/entity/comet_ember.png', generateCometEmber()],
     ['textures/entity/star_mote.png', generateStarMote()],
     ['textures/entity/ground_halo.png', generateGroundHalo()],
+    ['textures/entity/area_glow.png', generateAreaGlow()],
     ['textures/gui/icon_majestic.png', generateMajesticBadgeIcon()]
 ];
 
